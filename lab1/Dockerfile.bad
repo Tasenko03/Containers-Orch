@@ -1,0 +1,18 @@
+FROM python:3.13-slim-bookworm
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    TASKS_DB=/data/tasks.sqlite3
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends vim \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /data
+
+COPY requirements.txt app.py storage.py ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+USER root
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
